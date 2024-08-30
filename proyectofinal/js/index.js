@@ -90,3 +90,4 @@ document.getElementById('view-cart').addEventListener('click', viewCart);
 // Inicializar la visualización del carrito
 updateCart();
 
+
