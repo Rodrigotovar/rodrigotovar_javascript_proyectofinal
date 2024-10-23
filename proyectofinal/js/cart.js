@@ -1,21 +1,50 @@
-// Array de productos
-const products = [
-    { id: 1, name: 'Sin Retorno al Principio', price: 200 },
-    { id: 2, name: 'El Frio de la Primavera', price: 250 },
-    { id: 3, name: 'De Patios Vacios Y Corazones Rotos', price: 180 },
-    { id: 4, name: 'B(U)da', price: 220 },
-    { id: 5, name: 'Sinergia', price: 270 },
-    { id: 6, name: 'Pepe Levine', price: 230 },
-    { id: 7, name: 'Oasis', price: 200 },
-    { id: 8, name: 'Nocturno', price: 260 },
-    { id: 9, name: 'Letras Vacías', price: 210 },
-    { id: 10, name: 'De Estos Amores', price: 240 }
-];
-
-// Inicializar carrito desde localStorage
+// Inicialización del carrito desde localStorage
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-let discountCode = 'DISCOUNT10'; // Código de descuento ficticio para ejemplo
+let discountCode = 'DISCOUNT10'; // Código de descuento ficticio
 let discountValue = 0.10; // 10% de descuento
+let products = []; // Inicialmente vacío, se llenará desde la API
+
+// Función para obtener productos desde una API ficticia (puedes cambiar la URL por la real)
+function fetchProducts() {
+    fetch('https://api.ficticia.com/products') // Cambia la URL por la correcta
+        .then(response => response.json())
+        .then(data => {
+            products = data; // Guardamos los productos traídos de la API
+            displayProducts(); // Mostramos los productos en el DOM
+        })
+        .catch(error => {
+            console.error('Error al obtener los productos:', error);
+        });
+}
+
+// Función para mostrar productos en el DOM
+function displayProducts() {
+    const productsList = document.getElementById('products-list');
+    productsList.innerHTML = ''; // Limpiamos el contenedor
+
+    products.forEach(product => {
+        const productItem = document.createElement('div');
+        productItem.className = 'col-md-4 mb-3';
+        productItem.innerHTML = `
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">${product.name}</h5>
+                    <p class="card-text">Precio: $${product.price} MXN</p>
+                    <button class="btn btn-primary add-to-cart" data-product="${product.id}">Agregar al carrito</button>
+                </div>
+            </div>
+        `;
+        productsList.appendChild(productItem);
+    });
+
+    // Agregar eventos a los botones de añadir al carrito
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = parseInt(button.getAttribute('data-product'));
+            addToCart(productId);
+        });
+    });
+}
 
 // Función para actualizar el carrito en el DOM
 function updateCart() {
@@ -23,7 +52,7 @@ function updateCart() {
     const totalAmount = document.getElementById('total-amount');
     let total = 0;
 
-    cartItemsList.innerHTML = '';
+    cartItemsList.innerHTML = ''; // Limpiar lista del carrito
 
     cart.forEach(item => {
         const product = products.find(p => p.id === item.id);
@@ -35,16 +64,27 @@ function updateCart() {
         }
     });
 
-    // Aplicar descuento si se ha introducido un código válido
+    // Aplicar descuento si el código es válido
     const discount = (discountCode === document.getElementById('discount-code').value.toUpperCase()) ? total * discountValue : 0;
     total -= discount;
 
-    totalAmount.textContent = `Total: $${total} MXN`;
+    totalAmount.textContent = `Total: $${total.toFixed(2)} MXN`;
+    localStorage.setItem('cart', JSON.stringify(cart)); // Actualizar carrito en localStorage
 }
 
-// Función para aplicar descuento
-function applyDiscount() {
+// Función para añadir un producto al carrito
+function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    const productIndex = cart.findIndex(item => item.id === productId);
+    if (productIndex > -1) {
+        cart[productIndex].quantity += 1;
+    } else {
+        cart.push({ id: productId, quantity: 1 });
+    }
     updateCart();
+    showToast(`Has agregado el disco "${product.name}" al carrito.`);
 }
 
 // Función para vaciar el carrito
@@ -54,7 +94,26 @@ function emptyCart() {
     updateCart();
 }
 
-// Inicializar la visualización del carrito
+// Función para mostrar un toast
+function showToast(message) {
+    Toastify({
+        text: message,
+        duration: 3000,
+        close: true,
+        gravity: "top", // "top" or "bottom"
+        position: "right", // "left", "center" or "right"
+        backgroundColor: "#0088ab", // Color de fondo
+        stopOnFocus: true, // No desaparecer al pasar el mouse
+    }).showToast();
+}
+
+// Función para aplicar descuento
+function applyDiscount() {
+    updateCart();
+}
+
+// Inicializar carrito y productos al cargar la página
+fetchProducts();
 updateCart();
 
 // Añadir eventos a los botones

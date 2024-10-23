@@ -1,22 +1,19 @@
-// Array de productos
-const products = [
-    { id: 1, name: 'Sin Retorno al Principio', price: 200 },
-    { id: 2, name: 'El Frio de la Primavera', price: 250 },
-    { id: 3, name: 'De Patios Vacios Y Corazones Rotos', price: 180 },
-    { id: 4, name: 'B(U)da', price: 220 },
-    { id: 5, name: 'Sinergia', price: 270 },
-    { id: 6, name: 'Pepe Levine', price: 230 },
-    { id: 7, name: 'Oasis', price: 200 },
-    { id: 8, name: 'Nocturno', price: 260 },
-    { id: 9, name: 'Letras Vacías', price: 210 },
-    { id: 10, name: 'De Estos Amores', price: 240 }
-];
+// Obtener productos desde una API simulada
+function fetchProducts() {
+    return fetch('https://api.mitienda.com/products') // URL ficticia de la API
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al obtener productos');
+            }
+            return response.json();
+        });
+}
 
 // Inicializar carrito desde localStorage
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 // Función para actualizar el carrito en el DOM
-function updateCart() {
+function updateCart(products) {
     const cartItemsList = document.getElementById('cart-items');
     const totalAmount = document.getElementById('total-amount');
     let total = 0;
@@ -25,10 +22,12 @@ function updateCart() {
 
     cart.forEach(item => {
         const product = products.find(p => p.id === item.id);
-        total += product.price * item.quantity;
-        const listItem = document.createElement('li');
-        listItem.textContent = `${product.name} x ${item.quantity} - $${product.price * item.quantity} MXN`;
-        cartItemsList.appendChild(listItem);
+        if (product) {
+            total += product.price * item.quantity;
+            const listItem = document.createElement('li');
+            listItem.textContent = `${product.name} x ${item.quantity} - $${product.price * item.quantity} MXN`;
+            cartItemsList.appendChild(listItem);
+        }
     });
 
     totalAmount.textContent = `Total: $${total} MXN`;
@@ -48,7 +47,7 @@ function showToast(message) {
 }
 
 // Añadir producto al carrito
-function addToCart(productId) {
+function addToCart(productId, products) {
     const product = products.find(p => p.id === productId);
     if (!product) return; // Si no se encuentra el producto, no hacer nada
 
@@ -59,15 +58,15 @@ function addToCart(productId) {
         cart.push({ id: productId, quantity: 1 });
     }
     localStorage.setItem('cart', JSON.stringify(cart));
-    updateCart();
+    updateCart(products);
     showToast(`Has agregado el disco "${product.name}" al carrito.`);
 }
 
 // Vaciar carrito
-function emptyCart() {
+function emptyCart(products) {
     cart = [];
     localStorage.removeItem('cart');
-    updateCart();
+    updateCart(products);
     showToast('El carrito ha sido vaciado.');
 }
 
@@ -77,17 +76,30 @@ function viewCart() {
 }
 
 // Añadir eventos a los botones
-document.querySelectorAll('.add-to-cart').forEach(button => {
-    button.addEventListener('click', () => {
-        const productId = parseInt(button.getAttribute('data-product'));
-        addToCart(productId);
+function addEventListeners(products) {
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = parseInt(button.getAttribute('data-product'));
+            addToCart(productId, products);
+        });
     });
-});
 
-document.getElementById('empty-cart').addEventListener('click', emptyCart);
-document.getElementById('view-cart').addEventListener('click', viewCart);
+    document.getElementById('empty-cart').addEventListener('click', () => emptyCart(products));
+    document.getElementById('view-cart').addEventListener('click', viewCart);
+}
 
-// Inicializar la visualización del carrito
-updateCart();
+// Ver carrito
+function viewCart() {
+    window.location.href = 'cart.html';
+}
 
-
+// Inicializar productos y la visualización del carrito
+fetchProducts()
+    .then(products => {
+        addEventListeners(products);
+        updateCart(products);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Hubo un problema al cargar los productos.');
+    });

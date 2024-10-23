@@ -41,39 +41,34 @@
     </ul>
     <br><br>
 
-
-    
-    <div class="carrito">
-    <img src="img/carrito/logodelcarritoparatienda.png" width="100" alt="Imagen del carrito de compras">
-    <ul id="cart-items"></ul>
-    <div>
-        <label for="discount-code">Código de descuento:</label>
-        <br>
-        <input type="text" id="discount-code">
-        <br>
-        <button id="apply-discount">Aplicar</button>
-        <br>
+    <div class="container carrito">
+        <div class="row">
+            <div class="col-md-6">
+                <img src="img/carrito/logodelcarritoparatienda.png" width="100" alt="Imagen del carrito de compras">
+                <ul id="cart-items" class="list-group mb-3"></ul>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="discount-code" class="form-label">Código de descuento:</label>
+                    <input type="text" id="discount-code" class="form-control">
+                </div>
+                <button id="apply-discount" class="btn btn-primary mb-3">Aplicar</button>
+                <div id="total-amount" class="fs-5 mb-3">Total: $0 MXN</div>
+                <button id="empty-cart" class="btn btn-danger">Vaciar Carrito</button>
+                <br><br>
+                <a href="albums&compras.html" class="btn btn-link">Volver a la tienda</a>
+            </div>
+        </div>
     </div>
-    <div id="total-amount">Total: $0 MXN</div>
-    <br>
-    <button id="empty-cart">Vaciar Carrito</button>
-    <br>
-    <a href="albums&compras.html">Volver a la tienda</a>
-    
+
+    <footer class="mt-5">
+        <div class="text-center">
+            <img src="img/footer/LogoDoctorDestino2022_negro_amarrillo.png" width="250px" alt="Logo Doctor Destino">
+        </div>
+    </footer>
+
     <script src="cart.js"></script>
-    </div>
-
-
-
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
-
-<footer>
-    <div class="logoDoc">
-        <img src="img/footer/LogoDoctorDestino2022_negro_amarrillo.png" width="250px" alt="Logo Doctor Destino">
-    </div>
-</footer>
-
-<script src="js/index.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
 </html>
