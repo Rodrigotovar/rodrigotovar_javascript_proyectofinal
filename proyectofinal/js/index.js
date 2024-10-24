@@ -1,11 +1,25 @@
-// Obtener productos desde una API simulada
+// Simulación de una API que devuelve productos
+const apiEndpoint = 'https://fakestoreapi.com/products'; // URL de ejemplo
+
+// Obtener productos desde una API usando fetch y promesas
 function fetchProducts() {
-    return fetch('https://api.mitienda.com/products') // URL ficticia de la API
+    return fetch(apiEndpoint)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Error al obtener productos');
             }
-            return response.json();
+            return response.json(); // Parsear la respuesta a JSON
+        })
+        .then(data => {
+            // Mapear productos de la API a nuestro formato
+            return data.map((product, index) => ({
+                id: index + 1,
+                name: product.title,
+                price: Math.floor(product.price), // Precio redondeado a entero
+            }));
+        })
+        .catch(error => {
+            console.error('Error al obtener productos:', error);
         });
 }
 
@@ -75,8 +89,11 @@ function viewCart() {
     window.location.href = 'cart.html';
 }
 
-// Añadir eventos a los botones
-function addEventListeners(products) {
+// Inicializar la funcionalidad de la página
+fetchProducts().then(products => {
+    if (!products) return;
+
+    // Añadir eventos a los botones
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', () => {
             const productId = parseInt(button.getAttribute('data-product'));
@@ -84,22 +101,12 @@ function addEventListeners(products) {
         });
     });
 
-    document.getElementById('empty-cart').addEventListener('click', () => emptyCart(products));
-    document.getElementById('view-cart').addEventListener('click', viewCart);
-}
-
-// Ver carrito
-function viewCart() {
-    window.location.href = 'cart.html';
-}
-
-// Inicializar productos y la visualización del carrito
-fetchProducts()
-    .then(products => {
-        addEventListeners(products);
-        updateCart(products);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('Hubo un problema al cargar los productos.');
+    document.getElementById('empty-cart').addEventListener('click', () => {
+        emptyCart(products);
     });
+
+    document.getElementById('view-cart').addEventListener('click', viewCart);
+
+    // Inicializar la visualización del carrito
+    updateCart(products);
+});
